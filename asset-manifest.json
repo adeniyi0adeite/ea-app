@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ea-app/static/css/main.e6c13ad2.css",
-    "main.js": "/ea-app/static/js/main.494b545d.js",
+    "main.js": "/ea-app/static/js/main.ca95e46d.js",
     "index.html": "/ea-app/index.html",
     "main.e6c13ad2.css.map": "/ea-app/static/css/main.e6c13ad2.css.map",
-    "main.494b545d.js.map": "/ea-app/static/js/main.494b545d.js.map"
+    "main.ca95e46d.js.map": "/ea-app/static/js/main.ca95e46d.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.494b545d.js"
+    "static/js/main.ca95e46d.js"
   ]
 }
