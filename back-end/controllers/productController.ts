@@ -2,7 +2,7 @@
 
 
 import { Request, Response } from 'express';
-import { Product } from '../models/Product'; // Import your product model
+import { Product } from '../models/Product';
 
 // Get all products
 const getProducts = async (req: Request, res: Response) => {
@@ -28,5 +28,31 @@ const getProductById = async (req: Request, res: Response) => {
   }
 };
 
-export { getProducts, getProductById }; // Export both functions
+// Create a new product
+const createProduct = async (req: Request, res: Response) => {
+  const { name, description, price } = req.body;
 
+  try {
+    // Create the new product
+    const newProduct = await Product.create({
+      name,
+      description,
+      price,
+    });
+
+    console.log(newProduct);
+
+
+    // Sequelize instance has an `.get()` method that retrieves data, which includes the `id`
+    const productResponse = newProduct.get();
+    
+    console.log(newProduct);
+
+    res.status(201).json(productResponse); // Return the full product object including the auto-generated id
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating product', error });
+  }
+};
+
+
+export { createProduct, getProducts, getProductById };

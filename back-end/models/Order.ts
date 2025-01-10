@@ -3,12 +3,7 @@ import { DataTypes, Model } from 'sequelize';
 import { db } from '../config/db';
 
 class Order extends Model {
-  public id!: number;
-  public userId!: number;
-  public totalAmount!: number;
-  public status!: string; // e.g., 'pending', 'paid'
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // No need to declare class fields explicitly
 }
 
 Order.init(
@@ -34,6 +29,7 @@ Order.init(
   {
     sequelize: db,
     modelName: 'Order',
+    timestamps: true, // Automatically manage createdAt and updatedAt
   }
 );
 

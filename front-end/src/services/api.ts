@@ -5,6 +5,20 @@ const API = axios.create({
   baseURL: "http://localhost:5000/api", // Your backend server URL
 });
 
+
+
+export const addProduct = async (product: { name: string; description: string; price: number }) => {
+  try {
+    const response = await API.post('/products', product);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding product:', error);
+    throw error; // Rethrow error to handle it in the component
+  }
+};
+
+
+
 // Fetch products from backend
 export const getProducts = async () => {
   try {
