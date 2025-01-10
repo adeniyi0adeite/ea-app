@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "./",  // or adjust to point to the correct folder
+    "strict": true
+  },
+  "include": [
+    "**/*.ts"  // Include all .ts files in the project
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
