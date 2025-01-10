@@ -2,35 +2,34 @@ import axios from "axios";
 
 // Define base URL for the API
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://localhost:5000/api", // Your backend server URL
 });
 
-
-// product mock
-export const getProductMock = async () => {
-    // Mocked product data
-    return [
-      { id: 1, name: "Product 1", description: "Description for Product 1", price: 100 },
-      { id: 2, name: "Product 2", description: "Description for Product 2", price: 200 },
-      { id: 3, name: "Product 3", description: "Description for Product 3", price: 300 },
-    ];
-};
-  
-
-
+// Fetch products from backend
 export const getProducts = async () => {
   try {
     const response = await API.get("/products");
-    return response.data;
+    return response.data; // Assuming your API returns an array of products
   } catch (error) {
     console.error("Error fetching products:", error);
   }
 };
 
+// Fetch product by ID from backend
+export const getProductById = async (id: number) => {
+  try {
+    const response = await API.get(`/products/${id}`); // Fetch single product
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+  }
+};
+
+// Add product to cart (calls backend API)
 export const addToCart = async (productId: number) => {
   try {
     const response = await API.post("/cart", { productId });
-    return response.data;
+    return response.data; // Handle the response (e.g., cart update)
   } catch (error) {
     console.error("Error adding to cart:", error);
   }

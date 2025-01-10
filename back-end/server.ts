@@ -4,7 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { authRoutes } from './routes/authRoutes';
-import { productRoutes } from './routes/productRoutes';
+import { productRoutes } from './routes/productRoutes'; // Import product routes
 import { cartRoutes } from './routes/cartRoutes';
 import { db } from './config/db';
 
@@ -18,7 +18,7 @@ app.use(bodyParser.json()); // Parse incoming JSON requests
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
+app.use('/api/products', productRoutes); // Use product routes here
 app.use('/api/cart', cartRoutes);
 
 // Database connection and sync

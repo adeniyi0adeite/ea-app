@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
-import { getProductMock } from "../services/api"; // Import the mock function
+import { getProducts } from "../services/api"; // Import the real API function
 
 const HomePage = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -8,8 +8,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Use the mock data for now
-        const productsData = await getProductMock();
+        // Fetch data from backend
+        const productsData = await getProducts();
         setProducts(productsData);
       } catch (error) {
         console.error("Failed to fetch products:", error);
