@@ -26,6 +26,8 @@ export const login = async (req: Request, res: Response) => {
 // Get user profile
 export const profile = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id;
+  console.log(userId); // Check if userId is correctly passed from JWT authentication
+
   try {
     const user = await getUserProfile(userId);
     res.status(200).json(user);

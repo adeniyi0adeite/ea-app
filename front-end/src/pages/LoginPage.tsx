@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/api'; // Implement the API service
+import { loginUser } from '../services/api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -11,9 +11,9 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await loginUser({ email, password });
-      localStorage.setItem('token', response.token); // Store JWT token
+      localStorage.setItem('token', response.token);
       alert('Login successful');
-      navigate('/profile'); // Redirect to profile after successful login
+      navigate('/profile');
     } catch (error) {
       console.error('Login error:', error);
       alert('Login failed');

@@ -1,36 +1,39 @@
 import React, { useEffect, useState } from "react";
-import ProductCard from "../components/ProductCard";
-import { getProducts } from "../services/api"; // Import the real API function
+import { Link } from "react-router-dom";
+import { getUserProfile } from "../services/api";
 
 const HomePage = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProfile = async () => {
       try {
-        // Fetch data from backend
-        const productsData = await getProducts();
-        setProducts(productsData);
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userProfile = await getUserProfile(token);
+          setUser(userProfile.user);
+        }
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error('Error fetching profile:', error);
       }
     };
-    fetchProducts();
+    fetchProfile();
   }, []);
 
   return (
     <div className="home-page">
       <h1>Welcome to the E-Commerce Store</h1>
-      <div className="product-list">
-        {/* Check if products is an array and has items before calling map */}
-        {Array.isArray(products) && products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard key={product.id} productId={product.id} />
-          ))
-        ) : (
-          <p>No products available</p>
-        )}
-      </div>
+      {user ? (
+        <div>
+          <p>Hello, {user.name}</p>
+          <Link to="/profile">User Profile</Link>
+        </div>
+      ) : (
+        <div>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Register</Link>
+        </div>
+      )}
     </div>
   );
 };

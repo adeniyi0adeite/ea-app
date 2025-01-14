@@ -1,33 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getProductById } from '../services/api'; // Fetch product by ID
+import { getAllProducts } from '../services/api';
 
 const ProductPage = () => {
-  const { id } = useParams();
-  const [product, setProduct] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProducts = async () => {
       try {
-        const productData = await getProductById(Number(id)); // Fetch the product using ID
-        setProduct(productData);
+        const products = await getAllProducts();
+        setProducts(products);
       } catch (error) {
-        console.error('Failed to fetch product:', error);
+        console.error('Error fetching products:', error);
       }
     };
-    fetchProduct();
-  }, [id]); // Re-run the effect when `id` changes
 
-  if (!product) {
-    return <p>Loading...</p>;
-  }
+    fetchProducts();
+  }, []);
 
   return (
     <div>
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
-      <p>Price: ${product.price}</p>
-      {/* You can add more product details here */}
+      <h1>All Products</h1>
+      <div className="product-list">
+        {products.map((product) => (
+          <div key={product.id} className="product-card">
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <p>${product.price}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

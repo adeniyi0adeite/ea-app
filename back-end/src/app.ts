@@ -5,7 +5,12 @@ import { productRoutes } from './routes/productRoutes';
 import { cartRoutes } from './routes/cartRoutes'; // Import cart routes
 import knex from './utils/db'; // Correct import for knex
 
+import cors from 'cors';
+
+
 const app = express();
+app.use(cors());
+
 
 // Middleware
 app.use(bodyParser.json());

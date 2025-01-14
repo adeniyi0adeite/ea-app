@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/api'; // Implement the API service
+import { registerUser } from '../services/api';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -11,9 +11,9 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await registerUser({ name, email, password });
+      await registerUser({ name, email, password });
       alert('Registration successful');
-      navigate('/login'); // Redirect to login after successful registration
+      navigate('/login');
     } catch (error) {
       console.error('Registration error:', error);
       alert('Registration failed');
