@@ -7,6 +7,29 @@ const API = axios.create({
 
 
 
+
+// Register user
+export const registerUser = async (userData: { name: string; email: string; password: string }) => {
+  const response = await API.post('/register', userData);
+  return response.data;
+};
+
+// Login user
+export const loginUser = async (loginData: { email: string; password: string }) => {
+  const response = await API.post('/login', loginData);
+  return response.data;
+};
+
+// Get user profile
+export const getUserProfile = async (token: string) => {
+  const response = await API.get('/user/profile', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+
+
 export const addProduct = async (product: { name: string; description: string; price: number }) => {
   try {
     const response = await API.post('/products', product);

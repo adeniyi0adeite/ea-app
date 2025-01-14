@@ -2,6 +2,7 @@
 
 # Ignore environment variable files
 .env
+setup_backend.sh
 
 # Node modules (dependencies)
 node_modules/
