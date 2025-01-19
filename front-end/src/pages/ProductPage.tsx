@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { getAllProducts, addToCart, removeItemFromCart, getUserCartItems } from '../services/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllProducts, addToCart as addToCartApi, removeItemFromCart as removeItemFromCartApi, getUserCartItems } from '../services/api';
 import { isAuthenticated, getUserIdFromToken } from '../utils/auth';
+import { RootState } from '../redux/store/store';
+import { setCartItems, addToCart, removeFromCart } from '../redux/slices/cart/cartSlice';
 import BasePage from './BasePage';
-
-
 
 const ProductPage = () => {
   const [products, setProducts] = useState<any[]>([]);
-  const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+
+  // Redux dispatch and cart items from the store
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -24,19 +28,19 @@ const ProductPage = () => {
     };
 
     const fetchCartItems = async () => {
-      try {
-        const userCartItems = await getUserCartItems();
-        setCartItems(userCartItems);
-      } catch (error) {
-        setError('Failed to fetch cart items');
+      if (isAuthenticated()) {
+        try {
+          const userCartItems = await getUserCartItems();
+          dispatch(setCartItems(userCartItems)); // Set cart items in Redux store
+        } catch (error) {
+          setError('Failed to fetch cart items');
+        }
       }
     };
 
     fetchProducts();
-    if (isAuthenticated()) {
-      fetchCartItems();
-    }
-  }, []);
+    fetchCartItems(); // Fetch and update cart items when the page loads
+  }, [dispatch]);
 
   const handleAddToCart = async (productId: number) => {
     if (!isAuthenticated()) {
@@ -45,10 +49,10 @@ const ProductPage = () => {
     }
 
     try {
-      await addToCart(productId, 1); // Add product with quantity 1 by default
+      await addToCartApi(productId, 1); // Add product with quantity 1 by default
       alert('Product added to cart!');
       const updatedCartItems = await getUserCartItems(); // Re-fetch cart items
-      setCartItems(updatedCartItems);
+      dispatch(setCartItems(updatedCartItems)); // Update cart in Redux store
     } catch (error) {
       setError('Failed to add product to cart');
     }
@@ -61,9 +65,9 @@ const ProductPage = () => {
     }
 
     try {
-      await removeItemFromCart(getUserIdFromToken()!, productId);
+      await removeItemFromCartApi(getUserIdFromToken()!, productId);
       const updatedCartItems = await getUserCartItems(); // Re-fetch cart items after removal
-      setCartItems(updatedCartItems);
+      dispatch(setCartItems(updatedCartItems)); // Update cart in Redux store
     } catch (error) {
       setError('Failed to remove product from cart');
     }

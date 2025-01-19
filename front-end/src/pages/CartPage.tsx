@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserCartItems, removeItemFromCart, updateUserItemQuantity } from '../services/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserCartItems, removeItemFromCart as removeItemFromCartApi, updateUserItemQuantity, clearCart as clearCartApi } from '../services/api';
 import { isAuthenticated, redirectIfNotAuthenticated, getUserIdFromToken } from '../utils/auth';
+import { RootState } from '../redux/store/store';
+import { setCartItems, removeFromCart, updateQuantity, clearCart } from '../redux/slices/cart/cartSlice';
 import BasePage from './BasePage';
 
-
-
-
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state: RootState) => state.cart.items); // Get cart items from Redux store
 
   useEffect(() => {
     if (!isAuthenticated()) {
       redirectIfNotAuthenticated(navigate);
     }
 
-    const fetchData = async () => {
+    const fetchCartItems = async () => {
       try {
         const cartData = await getUserCartItems();
-        setCartItems(cartData);
+        dispatch(setCartItems(cartData)); // Dispatch to Redux store
       } catch (error) {
         setError('Failed to fetch cart items');
       } finally {
@@ -29,15 +31,15 @@ const CartPage = () => {
       }
     };
 
-    fetchData();
-  }, [navigate]);
+    fetchCartItems();
+  }, [dispatch, navigate]);
 
   const handleRemoveFromCart = async (productId: number) => {
     try {
       const userId = getUserIdFromToken();
       if (userId) {
-        await removeItemFromCart(userId, productId);
-        setCartItems(prevCartItems => prevCartItems.filter(item => item.productId !== productId));
+        await removeItemFromCartApi(userId, productId);
+        dispatch(removeFromCart(productId)); // Dispatch to remove item from Redux store
       }
     } catch (error) {
       setError('Failed to remove item from cart');
@@ -48,37 +50,30 @@ const CartPage = () => {
     try {
       const userId = getUserIdFromToken();
       if (userId) {
-        // Call the clear cart API function
-        // API function for clearing the cart can be implemented if required
-        setCartItems([]);  // Optimistically clear the cart
+        await clearCartApi(userId); // Clear cart on backend
+        dispatch(clearCart()); // Dispatch to clear Redux cart
       }
     } catch (error) {
       setError('Failed to clear cart');
     }
   };
 
+  const handleQuantityChange = async (productId: number, newQuantity: number) => {
+    try {
+      await updateUserItemQuantity(productId, newQuantity);
+      dispatch(updateQuantity({ productId, quantity: newQuantity })); // Update quantity in Redux store
+    } catch (error) {
+      setError('Failed to update quantity');
+    }
+  };
+
   const handleQuantityIncrease = async (productId: number, currentQuantity: number) => {
-    const newQuantity = currentQuantity + 1;
-    await handleQuantityChange(productId, newQuantity);
+    await handleQuantityChange(productId, currentQuantity + 1);
   };
 
   const handleQuantityDecrease = async (productId: number, currentQuantity: number) => {
     if (currentQuantity > 1) {
-      const newQuantity = currentQuantity - 1;
-      await handleQuantityChange(productId, newQuantity);
-    }
-  };
-
-  const handleQuantityChange = async (productId: number, newQuantity: number) => {
-    try {
-      const updatedItem = await updateUserItemQuantity(productId, newQuantity);
-      setCartItems(prevCartItems =>
-        prevCartItems.map(item =>
-          item.productId === productId ? { ...item, quantity: updatedItem.quantity } : item
-        )
-      );
-    } catch (error) {
-      setError('Failed to update quantity');
+      await handleQuantityChange(productId, currentQuantity - 1);
     }
   };
 
@@ -98,7 +93,7 @@ const CartPage = () => {
             >
               -
             </button>
-            <span>{item.quantity}</span>
+            <span>{item.quantity.toString()}</span>
             <button
               className="btn btn-secondary btn-sm ms-2"
               onClick={() => handleQuantityIncrease(item.productId, item.quantity)}
@@ -127,37 +122,37 @@ const CartPage = () => {
 
   return (
     <BasePage>
-        <div className="container">
+      <div className="container">
         <h1 className="my-4">Your Cart</h1>
         {error && <div className="alert alert-danger">{error}</div>}
 
         {cartItems.length === 0 ? (
-            <div>Your cart is empty.</div>
+          <div>Your cart is empty.</div>
         ) : (
-            <>
+          <>
             <table className="table">
-                <thead>
+              <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    <th>Actions</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                  <th>Actions</th>
                 </tr>
-                </thead>
-                <tbody>{renderCartItems()}</tbody>
+              </thead>
+              <tbody>{renderCartItems()}</tbody>
             </table>
 
             <div className="d-flex justify-content-between">
-                <button className="btn btn-danger" onClick={handleClearCart}>Clear Cart</button>
-                <div>
+              <button className="btn btn-danger" onClick={handleClearCart}>Clear Cart</button>
+              <div>
                 <h4>Total: ${totalAmount.toFixed(2)}</h4>
                 <button className="btn btn-primary">Checkout</button>
-                </div>
+              </div>
             </div>
-            </>
+          </>
         )}
-        </div>
+      </div>
     </BasePage>
   );
 };

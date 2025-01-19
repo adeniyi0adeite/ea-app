@@ -1,20 +1,22 @@
-// src/components/Navbar.tsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../utils/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../redux/store/store';
 import { getUserCartItems } from '../services/api';
+import { setCartItems } from '../redux/slices/cart/cartSlice';
 
 const Navbar = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const cartItemCount = useSelector((state: RootState) => state.cart.items.length);
 
   useEffect(() => {
     const fetchCartItemCount = async () => {
       if (isAuthenticated()) {
         try {
           const cartItems = await getUserCartItems();
-          setCartItemCount(cartItems.length);  // Set the cart item count
+          dispatch(setCartItems(cartItems));
         } catch (error) {
           console.error('Failed to fetch cart items');
         }
@@ -22,7 +24,7 @@ const Navbar = () => {
     };
 
     fetchCartItemCount();
-  }, []);
+  }, [dispatch]);
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Clear the token
@@ -33,17 +35,6 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">E-Shop</Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">

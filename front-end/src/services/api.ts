@@ -80,6 +80,30 @@ export const removeItemFromCart = async (userId: number, itemId: number) => {
   }
 };
 
+
+// Assuming you have an API function for clearing the cart:
+export const clearCart = async (userId: number) => {
+  try {
+    const token = localStorage.getItem('token'); // Retrieve token from localStorage
+    if (!token) {
+      throw new Error('No token found. Unauthorized');
+    }
+
+    const response = await API.delete(`/cart/clear`, {
+      headers: { Authorization: `Bearer ${token}` }, // Include token in Authorization header
+      data: { userId }, // Include userId in the body of the request
+    });
+
+    console.log('Response from clearing cart:', response.data);
+    return response.data; // Return success confirmation or any data from the backend
+  } catch (error) {
+    console.error('Error in API call to clear cart:', error);
+    throw new Error('Error clearing cart');
+  }
+};
+
+
+
 export const getUserCartItems = async () => {
   try {
     const token = localStorage.getItem('token'); // Retrieve token from localStorage
