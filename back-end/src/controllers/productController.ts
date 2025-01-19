@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { addProduct, editProduct, removeProduct, getProductById, getAllProducts } from '../services/productService';
 
 // Add a new product
-export const create = async (req: Request, res: Response) => {
+export const create = async (req: Request, res: Response): Promise<void> => {
   const { name, description, price, stock } = req.body;
   try {
     const product = await addProduct(name, description, price, stock);
@@ -13,7 +13,7 @@ export const create = async (req: Request, res: Response) => {
 };
 
 // Update a product by ID
-export const update = async (req: Request, res: Response) => {
+export const update = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const data = req.body;
   try {
@@ -25,7 +25,7 @@ export const update = async (req: Request, res: Response) => {
 };
 
 // Delete a product by ID
-export const remove = async (req: Request, res: Response) => {
+export const remove = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     await removeProduct(Number(id));
@@ -36,7 +36,7 @@ export const remove = async (req: Request, res: Response) => {
 };
 
 // Get a product by ID
-export const getOne = async (req: Request, res: Response) => {
+export const getOne = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const product = await getProductById(Number(id));
@@ -47,7 +47,7 @@ export const getOne = async (req: Request, res: Response) => {
 };
 
 // Get all products
-export const getAll = async (req: Request, res: Response) => {
+export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
     const products = await getAllProducts();
     res.status(200).json(products);

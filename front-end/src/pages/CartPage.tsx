@@ -1,99 +1,164 @@
 import React, { useEffect, useState } from 'react';
-import { getAllProducts } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { getUserCartItems, removeItemFromCart, updateUserItemQuantity } from '../services/api';
+import { isAuthenticated, redirectIfNotAuthenticated, getUserIdFromToken } from '../utils/auth';
+import BasePage from './BasePage';
+
+
+
 
 const CartPage = () => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [cart, setCart] = useState<any[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch all products once component is mounted
-    const fetchProducts = async () => {
+    if (!isAuthenticated()) {
+      redirectIfNotAuthenticated(navigate);
+    }
+
+    const fetchData = async () => {
       try {
-        const products = await getAllProducts();
-        setProducts(products);
+        const cartData = await getUserCartItems();
+        setCartItems(cartData);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        setError('Failed to fetch cart items');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, []);
+    fetchData();
+  }, [navigate]);
 
-  // Function to add an item to the cart
-  const addToCart = (product: any) => {
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-      // If item is already in cart, increase the quantity by 1
-      setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
-    } else {
-      // If item is not in cart, add it with an initial quantity of 1
-      setCart([...cart, { ...product, quantity: 1 }]);
+  const handleRemoveFromCart = async (productId: number) => {
+    try {
+      const userId = getUserIdFromToken();
+      if (userId) {
+        await removeItemFromCart(userId, productId);
+        setCartItems(prevCartItems => prevCartItems.filter(item => item.productId !== productId));
+      }
+    } catch (error) {
+      setError('Failed to remove item from cart');
     }
   };
 
-  // Function to increase the quantity of an item
-  const increaseQuantity = (productId: number) => {
-    setCart(cart.map(item => item.id === productId ? { ...item, quantity: item.quantity + 1 } : item));
-  };
-
-  // Function to decrease the quantity of an item but ensure it doesn't go below 1
-  const decreaseQuantity = (productId: number) => {
-    setCart(cart.map(item => {
-      if (item.id === productId && item.quantity > 1) {
-        return { ...item, quantity: item.quantity - 1 };
+  const handleClearCart = async () => {
+    try {
+      const userId = getUserIdFromToken();
+      if (userId) {
+        // Call the clear cart API function
+        // API function for clearing the cart can be implemented if required
+        setCartItems([]);  // Optimistically clear the cart
       }
-      return item;
-    }));
+    } catch (error) {
+      setError('Failed to clear cart');
+    }
   };
 
-  // Function to remove an item from the cart
-  const removeFromCart = (productId: number) => {
-    setCart(cart.filter(item => item.id !== productId));
+  const handleQuantityIncrease = async (productId: number, currentQuantity: number) => {
+    const newQuantity = currentQuantity + 1;
+    await handleQuantityChange(productId, newQuantity);
   };
 
-  // Recalculate the total price whenever the cart changes
-  useEffect(() => {
-    const total = cart.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
-    setTotalPrice(total);
-  }, [cart]); // The total price recalculates whenever cart changes
+  const handleQuantityDecrease = async (productId: number, currentQuantity: number) => {
+    if (currentQuantity > 1) {
+      const newQuantity = currentQuantity - 1;
+      await handleQuantityChange(productId, newQuantity);
+    }
+  };
+
+  const handleQuantityChange = async (productId: number, newQuantity: number) => {
+    try {
+      const updatedItem = await updateUserItemQuantity(productId, newQuantity);
+      setCartItems(prevCartItems =>
+        prevCartItems.map(item =>
+          item.productId === productId ? { ...item, quantity: updatedItem.quantity } : item
+        )
+      );
+    } catch (error) {
+      setError('Failed to update quantity');
+    }
+  };
+
+  const calculateTotalAmount = () => {
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const renderCartItems = () => {
+    return cartItems.map(item => (
+      <tr key={item.productId}>
+        <td>{item.name}</td>
+        <td>
+          <div className="d-flex align-items-center">
+            <button
+              className="btn btn-secondary btn-sm me-2"
+              onClick={() => handleQuantityDecrease(item.productId, item.quantity)}
+            >
+              -
+            </button>
+            <span>{item.quantity}</span>
+            <button
+              className="btn btn-secondary btn-sm ms-2"
+              onClick={() => handleQuantityIncrease(item.productId, item.quantity)}
+            >
+              +
+            </button>
+          </div>
+        </td>
+        <td>${item.price}</td>
+        <td>${item.price * item.quantity}</td>
+        <td>
+          <button
+            className="btn btn-danger"
+            onClick={() => handleRemoveFromCart(item.productId)}
+          >
+            Remove
+          </button>
+        </td>
+      </tr>
+    ));
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  const totalAmount = calculateTotalAmount();
 
   return (
-    <div>
-      <h1>Shopping Cart</h1>
-      <div className="product-list">
-        {products.map(product => (
-          <div key={product.id} className="product-card">
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p>${Number(product.price).toFixed(2)}</p>
-            <button onClick={() => addToCart(product)}>Add to Cart</button>
-          </div>
-        ))}
-      </div>
+    <BasePage>
+        <div className="container">
+        <h1 className="my-4">Your Cart</h1>
+        {error && <div className="alert alert-danger">{error}</div>}
 
-      <h2>Selected Items</h2>
-      {cart.length > 0 ? (
-        <div className="cart-items">
-          {cart.map(item => (
-            <div key={item.id} className="cart-item">
-              <h3>{item.name}</h3>
-              <p>${Number(item.price).toFixed(2)}</p>
-              <div className="quantity-controls">
-                <button onClick={() => decreaseQuantity(item.id)}>-</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => increaseQuantity(item.id)}>+</button>
-              </div>
-              <button onClick={() => removeFromCart(item.id)}>Remove</button>
+        {cartItems.length === 0 ? (
+            <div>Your cart is empty.</div>
+        ) : (
+            <>
+            <table className="table">
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>{renderCartItems()}</tbody>
+            </table>
+
+            <div className="d-flex justify-content-between">
+                <button className="btn btn-danger" onClick={handleClearCart}>Clear Cart</button>
+                <div>
+                <h4>Total: ${totalAmount.toFixed(2)}</h4>
+                <button className="btn btn-primary">Checkout</button>
+                </div>
             </div>
-          ))}
-          <h2>Total Price: ${totalPrice.toFixed(2)}</h2>
-          <button onClick={() => alert('Proceed to checkout')}>Checkout</button>
+            </>
+        )}
         </div>
-      ) : (
-        <p>No items in the cart</p>
-      )}
-    </div>
+    </BasePage>
   );
 };
 

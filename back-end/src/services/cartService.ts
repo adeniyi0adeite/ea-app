@@ -1,39 +1,92 @@
-import { findCartItem, addCartItem, removeCartItem, getCartItemsByCartId, clearCartItems } from '../models/cart';
-import { findCartByUserId, createCartForUser } from '../models/cart'; // Assuming this function retrieves a user's cart.
+import { createCartForUser, findCartItem, addCartItem, removeCartItem, clearCartItems, findCartByUserId, getCartItemsByUserId, updateCartItemQuantity } from '../models/cart';
+import { findProductById } from '../models/product'; // Assuming this function is defined to fetch product details
 
-export const addItemToCart = async (userId: number, productId: number, quantity: number, price: number) => {
-  let cart = await findCartByUserId(userId);  // Retrieve the user's cart.
+export const addItemToCart = async (userId: number, productId: number, quantity: number = 1): Promise<any> => {
+  let cart = await findCartByUserId(userId);
   
   if (!cart) {
-    // Create a new cart if not found
-    cart = await createCartForUser(userId);  // Add a function to create a cart for the user
+    cart = await createCartForUser(userId);
   }
-  
+
   const existingCartItem = await findCartItem(cart.id, productId);
   if (existingCartItem) {
     throw new Error('Item already in cart');
   }
-  
+
+  const product = await findProductById(productId);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  const price = product.price;
   const newCartItemId = await addCartItem(cart.id, productId, quantity, price);
   return await findCartItem(cart.id, productId);
 };
-export const removeItemFromCart = async (userId: number, cartItemId: number) => {
-  const cart = await findCartByUserId(userId);
-  if (!cart) throw new Error('Cart not found for this user');
 
-  await removeCartItem(cart.id, cartItemId);
-};
 
-export const getUserCartItems = async (userId: number) => {
+export const removeItemFromCart = async (userId: number, productId: number): Promise<any> => {
   const cart = await findCartByUserId(userId);
-  if (!cart) throw new Error('Cart not found for this user');
+
+  if (!cart) {
+    throw new Error('Cart not found');
+  }
+
+  const product = await findProductById(productId);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  const result = await removeCartItem(cart.id, productId);
   
-  return await getCartItemsByCartId(cart.id);
+  if (result === 0) {
+    throw new Error('Item not found in cart');
+  }
+
+  return { message: 'Item removed from cart successfully' };
 };
 
-export const clearUserCart = async (userId: number) => {
+
+export const clearUserCart = async (userId: number): Promise<any> => {
   const cart = await findCartByUserId(userId);
-  if (!cart) throw new Error('Cart not found for this user');
 
-  await clearCartItems(cart.id);
+  if (!cart) {
+    throw new Error('Cart not found');
+  }
+
+  // Clear all items in the cart
+  const result = await clearCartItems(cart.id);
+  
+  if (result === 0) {
+    throw new Error('No items to remove from the cart');
+  }
+
+  return { message: 'Cart cleared successfully' };
 };
+
+
+// Service function to fetch all cart items for a user
+export const getUserCartItems = async (userId: number): Promise<any[]> => {
+  const cartItems = await getCartItemsByUserId(userId);
+  if (cartItems.length === 0) {
+    throw new Error('No items in cart');
+  }
+  return cartItems;
+};
+
+
+export const updateItemQuantityInCart = async (userId: number, productId: number, quantity: number): Promise<any> => {
+  const cart = await findCartByUserId(userId);
+
+  if (!cart) {
+    throw new Error('Cart not found');
+  }
+
+  const product = await findProductById(productId);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  const updatedCartItem = await updateCartItemQuantity(cart.id, productId, quantity);
+  return updatedCartItem;
+};
+

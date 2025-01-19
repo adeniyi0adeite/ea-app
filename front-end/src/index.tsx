@@ -1,17 +1,17 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// src/index.tsx
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App'; // Example, change this according to your setup
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+
+ReactDOM.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 
-reportWebVitals();
+// Add this at the end to fix the error
+export {};

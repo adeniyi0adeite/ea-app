@@ -1,3 +1,5 @@
+// create_cart_items_table.ts
+
 import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
@@ -6,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('cartId').unsigned().notNullable().references('id').inTable('cart').onDelete('CASCADE');
     table.integer('productId').unsigned().notNullable().references('id').inTable('products').onDelete('CASCADE');
     table.integer('quantity').notNullable();
-    table.decimal('price', 10, 2).notNullable();
+    table.decimal('price', 10, 2).notNullable().defaultTo(0.00);
     table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });

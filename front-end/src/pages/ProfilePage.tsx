@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '../services/api';
 
-const ProfilePage = () => {
+const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 

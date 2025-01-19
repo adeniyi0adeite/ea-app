@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -17,3 +18,5 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     res.status(400).json({ message: 'Invalid token.' });
   }
 };
+
+
