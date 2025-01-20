@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import { userRoutes } from './routes/userRoutes';
 import { productRoutes } from './routes/productRoutes';
 import { cartRoutes } from './routes/cartRoutes'; // Import cart routes
+import { orderRoutes } from './routes/orderRoutes'; // Import cart routes
 import knex from './utils/db'; // Correct import for knex
 
 import cors from 'cors';
@@ -40,6 +41,7 @@ app.use(bodyParser.json());
 app.use('/api/user', userRoutes);
 app.use('/api/product', productRoutes); // Use product routes
 app.use('/api/cart', cartRoutes); // Use cart routes
+app.use('/api/order', orderRoutes); // Use cart routes
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
