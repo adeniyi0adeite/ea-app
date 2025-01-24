@@ -158,3 +158,66 @@ export const updateUserItemQuantity = async (productId: number, quantity: number
     throw new Error('Error updating item quantity');
   }
 };
+
+
+
+export const getUserDeliveryDetails = async (userId: number) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found. Unauthorized');
+    }
+
+    const response = await API.get(`/delivery/details`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { userId }
+    });
+
+    return response.data.details;
+  } catch (error) {
+    console.error('Error fetching delivery details:', error);
+    throw new Error('Error fetching delivery details');
+  }
+};
+
+
+export const createUserDeliveryDetails = async (userId: number, details: { address: string, bustop: string, phone: string }) => {
+  try {
+    const token = localStorage.getItem('token'); // Retrieve token from localStorage
+    if (!token) {
+      throw new Error('No token found. Unauthorized');
+    }
+
+    const response = await API.post(`/delivery/create`, details, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating delivery details:', error);
+    throw new Error('Error creating delivery details');
+  }
+};
+
+
+
+export const updateUserDeliveryDetails = async (userId: number, newDetails: { address: string, bustop: string, phone: string }) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found. Unauthorized');
+    }
+
+    const response = await API.put(`/delivery/update`, newDetails, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { userId }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error updating delivery details:', error);
+    throw new Error('Error updating delivery details');
+  }
+};
+
+
