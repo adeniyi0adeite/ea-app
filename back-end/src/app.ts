@@ -5,6 +5,7 @@ import { productRoutes } from './routes/productRoutes';
 import { cartRoutes } from './routes/cartRoutes'; // Import cart routes
 import { orderRoutes } from './routes/orderRoutes'; // Import cart routes
 import { deliveryRoutes } from './routes/deliveryRoutes'; // Import delivery routes
+import { paymentRoutes } from './routes/paymentRoutes'; // Import delivery routes
 import knex from './utils/db'; // Correct import for knex
 
 import cors from 'cors';
@@ -44,6 +45,7 @@ app.use('/api/product', productRoutes); // Use product routes
 app.use('/api/cart', cartRoutes); // Use cart routes
 app.use('/api/order', orderRoutes); // Use cart routes
 app.use('/api/delivery', deliveryRoutes); // Use cart routes
+app.use('/api/payment', paymentRoutes); // Use cart routes
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -4,10 +4,20 @@ import { Request, Response } from 'express';
 import { createOrder, deleteUserOrder, updateUserOrder, getUserOrderByOrderId, getAllUserOrders } from '../services/orderService';
 import { getUserCartItems } from '../services/cartService';
 
-// Create order controller (already in place)
-export const createOrderController = async (req: Request, res: Response) => {
+// Create order controller
+export const createOrderController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { deliveryAddress, nearestBustop, phoneNumber } = req.body;
+
+    // Validate that required fields are provided
+    if (!deliveryAddress || !nearestBustop || !phoneNumber) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Delivery address, nearest bustop, and phone number are required.' 
+      });
+      return;
+    }
+
     const userId = (req as any).user.id; // Assume user is authenticated
     const cartItems = await getUserCartItems(userId);
 
@@ -28,7 +38,7 @@ export const createOrderController = async (req: Request, res: Response) => {
 };
 
 // Controller to delete user order by order ID
-export const deleteUserOrderController = async (req: Request, res: Response) => {
+export const deleteUserOrderController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     await deleteUserOrder(Number(orderId));
@@ -39,7 +49,7 @@ export const deleteUserOrderController = async (req: Request, res: Response) => 
 };
 
 // Controller to update user order by order ID
-export const updateUserOrderController = async (req: Request, res: Response) => {
+export const updateUserOrderController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const updates = req.body;
@@ -51,7 +61,7 @@ export const updateUserOrderController = async (req: Request, res: Response) => 
 };
 
 // Controller to get user order by order ID
-export const getUserOrderByOrderIdController = async (req: Request, res: Response) => {
+export const getUserOrderByOrderIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const order = await getUserOrderByOrderId(Number(orderId));
@@ -66,7 +76,7 @@ export const getUserOrderByOrderIdController = async (req: Request, res: Respons
 };
 
 // Controller to get all user orders
-export const getAllUserOrdersController = async (_req: Request, res: Response) => {
+export const getAllUserOrdersController = async (_req: Request, res: Response): Promise<void> => {
   try {
     const orders = await getAllUserOrders();
     res.json({ success: true, orders });

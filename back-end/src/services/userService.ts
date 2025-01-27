@@ -36,7 +36,7 @@ export const loginUser = async (email: string, password: string) => {
     }
 
     // Generate JWT token
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, user.email);
     return { token, user };
   } catch (error) {
     throw new Error(`Error logging in user: ${(error as Error).message}`);
